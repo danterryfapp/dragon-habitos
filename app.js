@@ -779,3 +779,5 @@ const styles = {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<HabitTracker />);
+window.__dbkMounted = true;
+if (window.__dbkBootTimeout) clearTimeout(window.__dbkBootTimeout);

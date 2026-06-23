@@ -55,7 +55,16 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+
+<script>
+  // Si después de 8 segundos no cargó nada, probablemente una librería externa no llegó a tiempo.
+  window.__dbkBootTimeout = setTimeout(function () {
+    if (!window.__dbkMounted) {
+      showErrorOverlay('La app no terminó de cargar a tiempo.\nProbablemente React o Babel no se descargaron desde el CDN.\nRevisá tu conexión a internet e intentá de nuevo.');
+    }
+  }, 8000);
+</script>
 
 <script type="text/babel" data-presets="react" src="app.js"></script>
 
@@ -64,6 +73,31 @@
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('service-worker.js').catch(() => {});
     });
+  }
+
+  // Captura de errores visible en pantalla, para diagnosticar sin herramientas de desarrollador.
+  window.addEventListener('error', function (e) {
+    showErrorOverlay(e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErrorOverlay('Promise error: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+  });
+  function showErrorOverlay(text) {
+    if (document.getElementById('dbk-error-overlay')) return;
+    const box = document.createElement('div');
+    box.id = 'dbk-error-overlay';
+    box.style.position = 'fixed';
+    box.style.inset = '0';
+    box.style.background = '#1a0a0a';
+    box.style.color = '#ffd9d9';
+    box.style.fontFamily = 'monospace';
+    box.style.fontSize = '13px';
+    box.style.padding = '20px';
+    box.style.zIndex = '99999';
+    box.style.overflow = 'auto';
+    box.style.whiteSpace = 'pre-wrap';
+    box.textContent = 'Error detectado:\n\n' + text;
+    document.body.appendChild(box);
   }
 </script>
 </body>
