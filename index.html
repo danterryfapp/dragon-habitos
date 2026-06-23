@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Dragon Hábitos</title>
+
+<!-- PWA / iOS install metadata -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0E1E36" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Dragon Hábitos" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Saira:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #0E1E36; }
+  body {
+    font-family: 'Saira', sans-serif;
+    overscroll-behavior-y: none;
+  }
+  #root { min-height: 100vh; }
+
+  .dbk-btn:active { transform: scale(0.94); }
+  .dbk-check:focus-visible, .dbk-btn:focus-visible, .dbk-input:focus-visible {
+    outline: 2px solid #FFC83D; outline-offset: 2px;
+  }
+  .dbk-scroll::-webkit-scrollbar { height: 6px; }
+  .dbk-scroll::-webkit-scrollbar-thumb { background: #3A5C8C; border-radius: 4px; }
+
+  @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spin-slow { animation: spin-slow 9s linear infinite; }
+  @keyframes pulse-aura { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+  .aura-pulse { animation: pulse-aura 1.8s ease-in-out infinite; }
+  .aura-ultra { animation: pulse-aura 1.1s ease-in-out infinite; }
+  @keyframes cloud-drift { from { transform: translateX(0); } to { transform: translateX(-140px); } }
+  .cloud-drift { animation: cloud-drift 26s linear infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spin-slow, .aura-pulse, .aura-ultra, .cloud-drift { animation: none !important; }
+  }
+
+  /* Respect iPhone safe areas (notch / home indicator) */
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react" src="app.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
