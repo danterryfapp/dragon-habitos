@@ -104,9 +104,9 @@
   }
 
   Promise.all([
-    loadScript(['https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js', 'https://unpkg.com/react@18/umd/react.production.min.js'], 'React'),
-    loadScript(['https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js', 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'], 'ReactDOM'),
-    loadScript(['https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js', 'https://unpkg.com/@babel/standalone@7/babel.min.js'], 'Babel'),
+    loadScript(['https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js', 'https://unpkg.com/react@18.3.1/umd/react.production.min.js'], 'React'),
+    loadScript(['https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js', 'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js'], 'ReactDOM'),
+    loadScript(['https://cdn.jsdelivr.net/npm/@babel/standalone@7.25.6/babel.min.js', 'https://unpkg.com/@babel/standalone@7.25.6/babel.min.js'], 'Babel'),
   ]).then(function () {
     var appScript = document.createElement('script');
     appScript.type = 'text/babel';
@@ -122,17 +122,10 @@
 </script>
 
 <script>
-  // Service worker temporalmente desactivado mientras depuramos un problema de carga.
-  // Si había una versión vieja cacheada, esto la desregistra para evitar conflictos.
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function (regs) {
-      regs.forEach(function (reg) { reg.unregister(); });
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
     });
-    if (window.caches) {
-      caches.keys().then(function (names) {
-        names.forEach(function (name) { caches.delete(name); });
-      });
-    }
   }
 </script>
 </body>
