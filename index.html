@@ -53,38 +53,11 @@
 <body>
 <div id="root"></div>
 
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
-
 <script>
-  // Si después de 8 segundos no cargó nada, probablemente una librería externa no llegó a tiempo.
-  window.__dbkBootTimeout = setTimeout(function () {
-    if (!window.__dbkMounted) {
-      showErrorOverlay('La app no terminó de cargar a tiempo.\nProbablemente React o Babel no se descargaron desde el CDN.\nRevisá tu conexión a internet e intentá de nuevo.');
-    }
-  }, 8000);
-</script>
-
-<script type="text/babel" data-presets="react" src="app.js"></script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch(() => {});
-    });
-  }
-
   // Captura de errores visible en pantalla, para diagnosticar sin herramientas de desarrollador.
-  window.addEventListener('error', function (e) {
-    showErrorOverlay(e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '?'));
-  });
-  window.addEventListener('unhandledrejection', function (e) {
-    showErrorOverlay('Promise error: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
-  });
   function showErrorOverlay(text) {
     if (document.getElementById('dbk-error-overlay')) return;
-    const box = document.createElement('div');
+    var box = document.createElement('div');
     box.id = 'dbk-error-overlay';
     box.style.position = 'fixed';
     box.style.inset = '0';
@@ -98,6 +71,64 @@
     box.style.whiteSpace = 'pre-wrap';
     box.textContent = 'Error detectado:\n\n' + text;
     document.body.appendChild(box);
+  }
+  window.addEventListener('error', function (e) {
+    showErrorOverlay(e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErrorOverlay('Promise error: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+  });
+</script>
+
+<script>
+  // Carga React, ReactDOM y Babel con respaldo automático: si el CDN principal (jsDelivr)
+  // falla, probamos unpkg como segunda opción. Solo cuando los 3 están listos, cargamos app.js.
+  function loadScript(urls, globalName) {
+    return new Promise(function (resolve, reject) {
+      var i = 0;
+      function tryNext() {
+        if (typeof window[globalName] !== 'undefined') return resolve();
+        if (i >= urls.length) return reject(new Error('No se pudo cargar ' + globalName));
+        var s = document.createElement('script');
+        s.src = urls[i];
+        s.crossOrigin = 'anonymous';
+        s.onload = function () { resolve(); };
+        s.onerror = function () {
+          i++;
+          tryNext();
+        };
+        document.head.appendChild(s);
+      }
+      tryNext();
+    });
+  }
+
+  window.__dbkBootTimeout = setTimeout(function () {
+    if (!window.__dbkMounted) {
+      showErrorOverlay('La app no terminó de cargar a tiempo.\nProbablemente React o Babel no se descargaron desde el CDN.\nRevisá tu conexión a internet e intentá de nuevo.');
+    }
+  }, 15000);
+
+  Promise.all([
+    loadScript(['https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js', 'https://unpkg.com/react@18/umd/react.production.min.js'], 'React'),
+    loadScript(['https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js', 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'], 'ReactDOM'),
+    loadScript(['https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js', 'https://unpkg.com/@babel/standalone@7/babel.min.js'], 'Babel'),
+  ]).then(function () {
+    var appScript = document.createElement('script');
+    appScript.type = 'text/babel';
+    appScript.setAttribute('data-presets', 'react');
+    appScript.src = 'app.js';
+    document.body.appendChild(appScript);
+  }).catch(function (err) {
+    showErrorOverlay('No se pudieron cargar las librerías necesarias.\n' + err.message + '\nRevisá tu conexión a internet.');
+  });
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    });
   }
 </script>
 </body>
