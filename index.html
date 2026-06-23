@@ -103,12 +103,6 @@
     });
   }
 
-  window.__dbkBootTimeout = setTimeout(function () {
-    if (!window.__dbkMounted) {
-      showErrorOverlay('La app no terminó de cargar a tiempo.\nProbablemente React o Babel no se descargaron desde el CDN.\nRevisá tu conexión a internet e intentá de nuevo.');
-    }
-  }, 15000);
-
   Promise.all([
     loadScript(['https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js', 'https://unpkg.com/react@18/umd/react.production.min.js'], 'React'),
     loadScript(['https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js', 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'], 'ReactDOM'),
@@ -118,6 +112,9 @@
     appScript.type = 'text/babel';
     appScript.setAttribute('data-presets', 'react');
     appScript.src = 'app.js';
+    appScript.onerror = function () {
+      showErrorOverlay('No se pudo ejecutar app.js (revisá que el archivo se haya subido bien).');
+    };
     document.body.appendChild(appScript);
   }).catch(function (err) {
     showErrorOverlay('No se pudieron cargar las librerías necesarias.\n' + err.message + '\nRevisá tu conexión a internet.');
@@ -125,10 +122,17 @@
 </script>
 
 <script>
+  // Service worker temporalmente desactivado mientras depuramos un problema de carga.
+  // Si había una versión vieja cacheada, esto la desregistra para evitar conflictos.
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (reg) { reg.unregister(); });
     });
+    if (window.caches) {
+      caches.keys().then(function (names) {
+        names.forEach(function (name) { caches.delete(name); });
+      });
+    }
   }
 </script>
 </body>
