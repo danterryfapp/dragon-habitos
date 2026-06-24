@@ -80,46 +80,19 @@
   });
 </script>
 
-<script>
-  // Carga React, ReactDOM y Babel con respaldo automático: si el CDN principal (jsDelivr)
-  // falla, probamos unpkg como segunda opción. Solo cuando los 3 están listos, cargamos app.js.
-  function loadScript(urls, globalName) {
-    return new Promise(function (resolve, reject) {
-      var i = 0;
-      function tryNext() {
-        if (typeof window[globalName] !== 'undefined') return resolve();
-        if (i >= urls.length) return reject(new Error('No se pudo cargar ' + globalName));
-        var s = document.createElement('script');
-        s.src = urls[i];
-        s.crossOrigin = 'anonymous';
-        s.onload = function () { resolve(); };
-        s.onerror = function () {
-          i++;
-          tryNext();
-        };
-        document.head.appendChild(s);
-      }
-      tryNext();
-    });
-  }
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 
-  Promise.all([
-    loadScript(['https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js', 'https://unpkg.com/react@18.3.1/umd/react.production.min.js'], 'React'),
-    loadScript(['https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js', 'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js'], 'ReactDOM'),
-    loadScript(['https://cdn.jsdelivr.net/npm/@babel/standalone@7.25.6/babel.min.js', 'https://unpkg.com/@babel/standalone@7.25.6/babel.min.js'], 'Babel'),
-  ]).then(function () {
-    var appScript = document.createElement('script');
-    appScript.type = 'text/babel';
-    appScript.setAttribute('data-presets', 'react');
-    appScript.src = 'app.js';
-    appScript.onerror = function () {
-      showErrorOverlay('No se pudo ejecutar app.js (revisá que el archivo se haya subido bien).');
-    };
-    document.body.appendChild(appScript);
-  }).catch(function (err) {
-    showErrorOverlay('No se pudieron cargar las librerías necesarias.\n' + err.message + '\nRevisá tu conexión a internet.');
-  });
+<script>
+  window.__dbkBootTimeout = setTimeout(function () {
+    if (!window.__dbkMounted) {
+      showErrorOverlay('La app no terminó de cargar a tiempo. Revisá tu conexión e intentá de nuevo.');
+    }
+  }, 15000);
 </script>
+
+<script type="text/babel" data-presets="react" src="app.js"></script>
 
 <script>
   if ('serviceWorker' in navigator) {
