@@ -151,8 +151,118 @@ function Warrior({ pct, size = 96 }) {
   );
 }
 
-// ---------- Iconos propios (sin dependencias externas) ----------
-function DragonBallIcon({ size = 20, dots = 1 }) {
+// ---------- Insignia general del mes (promedio de todos los hábitos) ----------
+function rangoPara(pct) {
+  if (pct === 0) return { key: "madera", label: "Madera", stars: 0, color: [120, 85, 52], rim: [54, 35, 20], glow: null };
+  if (pct < 15) return { key: "bronce", label: "Bronce", stars: 1, color: [175, 96, 48], rim: [82, 42, 16], glow: [170, 95, 45] };
+  if (pct < 30) return { key: "plata", label: "Plata", stars: 2, color: [208, 215, 224], rim: [118, 128, 140], glow: [205, 213, 222] };
+  if (pct < 50) return { key: "oro", label: "Oro", stars: 3, color: [224, 168, 28], rim: [120, 84, 8], glow: [255, 205, 70], rays: true };
+  if (pct < 70) return { key: "platino", label: "Platino", stars: 4, color: [210, 222, 232], rim: [120, 140, 155], glow: [215, 230, 240] };
+  if (pct < 85) return { key: "diamante", label: "Diamante", stars: 5, color: [186, 120, 240], rim: [108, 50, 165], glow: [190, 130, 255] };
+  if (pct < 100) return { key: "heroico", label: "Heroico", stars: 6, color: [214, 48, 42], rim: [110, 16, 16], glow: [255, 80, 50], rays: true };
+  return { key: "maestro", label: "Maestro", stars: 7, color: [245, 244, 255], rim: [180, 175, 225], glow: [200, 190, 255], rays: true };
+}
+
+function rgb(arr, a = 1) {
+  return `rgba(${arr[0]}, ${arr[1]}, ${arr[2]}, ${a})`;
+}
+
+// Estrellas distribuidas dentro del círculo: 1 al centro, 2+ en anillo.
+function starPositions(n, r) {
+  if (n <= 0) return [];
+  if (n === 1) return [[0, 0]];
+  const ringR = r * 0.5;
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const ang = (-90 + (i * 360) / n) * (Math.PI / 180);
+    pts.push([ringR * Math.cos(ang), ringR * Math.sin(ang)]);
+  }
+  return pts;
+}
+
+function starPath(cx, cy, r, innerRatio = 0.46) {
+  let d = "";
+  for (let i = 0; i < 10; i++) {
+    const ang = (-90 + i * 36) * (Math.PI / 180);
+    const rad = i % 2 === 0 ? r : r * innerRatio;
+    const x = cx + rad * Math.cos(ang);
+    const y = cy + rad * Math.sin(ang);
+    d += (i === 0 ? "M" : "L") + x.toFixed(2) + "," + y.toFixed(2) + " ";
+  }
+  return d + "Z";
+}
+
+function RankBadge({ pct, size = 120 }) {
+  const rango = rangoPara(pct);
+  const id = React.useId ? React.useId() : "rb";
+  const r = 42;
+  const cx = 50, cy = 50;
+  const starR = rango.stars >= 6 ? 6.5 : rango.stars >= 4 ? 7.5 : rango.stars === 1 ? 11 : 9;
+  const starColorMap = {
+    madera: null,
+    bronce: "rgba(96,50,20,0.95)",
+    plata: "rgba(122,132,145,0.95)",
+    oro: "rgba(140,96,12,0.95)",
+    platino: "rgba(130,150,165,0.95)",
+    diamante: "rgba(108,32,170,0.95)",
+    heroico: "rgba(255,205,60,0.95)",
+    maestro: "rgba(170,160,235,0.95)",
+  };
+  const stars = starPositions(rango.stars, r);
+
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      {rango.glow && (
+        <div
+          className={rango.key === "maestro" ? "aura-ultra" : "aura-pulse"}
+          style={{
+            position: "absolute",
+            inset: -size * 0.22,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, ${rgb(rango.glow, 0.55)} 0%, ${rgb(rango.glow, 0.18)} 48%, transparent 76%)`,
+            filter: "blur(2px)",
+          }}
+        />
+      )}
+      {rango.rays && (
+        <svg viewBox="0 0 100 100" width={size} height={size} style={{ position: "absolute", inset: 0 }} className="spin-slow">
+          {Array.from({ length: 16 }).map((_, i) => {
+            const ang = (i * 360) / 16;
+            return (
+              <rect key={i} x="49" y="1" width="1.6" height="9" fill={rgb(rango.glow)} opacity="0.85"
+                transform={`rotate(${ang} 50 50)`} />
+            );
+          })}
+        </svg>
+      )}
+      <svg viewBox="0 0 100 100" width={size} height={size} style={{ position: "relative", zIndex: 2 }}>
+        <defs>
+          <radialGradient id={`rg-${rango.key}`} cx="38%" cy="32%" r="75%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="35%" stopColor={rgb(rango.color)} />
+            <stop offset="100%" stopColor={rgb(rango.rim)} />
+          </radialGradient>
+        </defs>
+        {rango.key === "madera" ? (
+          <g>
+            <circle cx={cx} cy={cy} r={r} fill={`url(#rg-${rango.key})`} stroke={rgb(rango.rim)} strokeWidth="2.5" />
+            {[-3, -2, -1, 0, 1, 2, 3].map((i) => (
+              <path key={i} d={`M ${cx - r * 0.85} ${cy + i * 10} Q ${cx} ${cy + i * 10 + 6} ${cx + r * 0.85} ${cy + i * 10}`}
+                fill="none" stroke="rgba(58,38,22,0.4)" strokeWidth="2" />
+            ))}
+          </g>
+        ) : (
+          <circle cx={cx} cy={cy} r={r} fill={`url(#rg-${rango.key})`} stroke={rgb(rango.rim)} strokeWidth="2.5" />
+        )}
+        {stars.map(([dx, dy], i) => (
+          <path key={i} d={starPath(cx + dx, cy + dy, starR)} fill={starColorMap[rango.key]} />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+
   const positions = {
     1: [[50, 50]],
     2: [[35, 35], [65, 65]],
@@ -261,6 +371,12 @@ function HabitTracker() {
     return Math.round((marked / totalDays) * 100);
   }, [checks, mKey, totalDays]);
 
+  const overallPct = useMemo(() => {
+    if (habits.length === 0) return 0;
+    const sum = habits.reduce((acc, h) => acc + percentFor(h.id), 0);
+    return Math.round(sum / habits.length);
+  }, [habits, percentFor]);
+
   const changeMonth = (delta) => {
     let m = monthIndex + delta;
     let y = year;
@@ -330,6 +446,15 @@ function HabitTracker() {
       {saveError && (
         <div style={styles.errorBanner}>No se pudo guardar el progreso en este dispositivo.</div>
       )}
+
+      <div style={styles.rankSection}>
+        <RankBadge pct={overallPct} size={104} />
+        <div style={styles.rankInfo}>
+          <div style={styles.rankLabel}>{rangoPara(overallPct).label}</div>
+          <div style={styles.rankSub}>Nivel general del mes</div>
+          <div style={styles.rankPct}>{overallPct}%</div>
+        </div>
+      </div>
 
       {focusedHabit && (
         <div style={styles.powerPanel}>
@@ -582,6 +707,40 @@ const styles = {
     fontSize: 12,
     padding: "8px 16px",
     textAlign: "center",
+  },
+  rankSection: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+    padding: "22px 20px",
+    margin: "14px 14px 0",
+    borderRadius: 22,
+    background: "linear-gradient(160deg, #1B2C4D 0%, #0D1830 100%)",
+    boxShadow: "0 0 0 1.5px rgba(255,255,255,0.08), 0 10px 30px rgba(0,0,0,0.45), 0 0 36px rgba(120,140,255,0.12)",
+    position: "relative",
+    zIndex: 3,
+  },
+  rankInfo: { flex: 1, minWidth: 0 },
+  rankLabel: {
+    fontFamily: "'Bangers', cursive",
+    fontSize: 26,
+    letterSpacing: "0.02em",
+    color: "#FFF6E0",
+    lineHeight: 1.05,
+  },
+  rankSub: {
+    fontSize: 11,
+    color: "#8FAFCB",
+    fontWeight: 600,
+    marginTop: 2,
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  },
+  rankPct: {
+    fontFamily: "'Bangers', cursive",
+    fontSize: 22,
+    color: "#FFC83D",
   },
   powerPanel: {
     display: "flex",
