@@ -427,10 +427,17 @@ function HabitTracker() {
                     outline: habit.id === focusHabit ? `2px solid ${habit.color}` : "none",
                   }}
                   onClick={() => setFocusHabit(habit.id)}
-                  onContextMenu={(e) => { e.preventDefault(); setConfirmDelete(habit.id); }}
                 >
                   <span style={{ ...styles.dot, background: habit.color }} />
                   <span style={styles.habitName}>{habit.name}</span>
+                  <button
+                    className="dbk-btn"
+                    onClick={(e) => { e.stopPropagation(); setConfirmDelete(habit.id); }}
+                    aria-label={`Borrar hábito ${habit.name}`}
+                    style={styles.deleteHabitBtn}
+                  >
+                    <XIcon size={12} color="#5C7C9C" />
+                  </button>
                 </div>
                 {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => {
                   const checked = !!((checks[habit.id] || {})[mKey] || {})[day];
@@ -501,7 +508,7 @@ function HabitTracker() {
             <span>Agregar hábito</span>
           </button>
         )}
-        <div style={styles.hintText}>Mantené pulsado un hábito para borrarlo</div>
+        <div style={styles.hintText}>Tocá la "×" junto a un hábito para borrarlo</div>
       </div>
 
       {confirmDelete && (
@@ -642,15 +649,29 @@ const styles = {
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
-    gap: 8,
-    paddingRight: 10,
+    gap: 6,
+    paddingRight: 6,
     cursor: "pointer",
     borderRadius: 6,
   },
   dot: { width: 8, height: 8, borderRadius: 999, flexShrink: 0 },
+  deleteHabitBtn: {
+    flexShrink: 0,
+    width: 20,
+    height: 20,
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.08)",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+  },
   habitName: {
     fontSize: 13,
     fontWeight: 700,
+    flex: 1,
+    minWidth: 0,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
