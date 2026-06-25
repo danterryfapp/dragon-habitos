@@ -262,7 +262,8 @@ function RankBadge({ pct, size = 120 }) {
   );
 }
 
-
+// ---------- Iconos propios (sin dependencias externas) ----------
+function DragonBallIcon({ size = 20, dots = 1 }) {
   const positions = {
     1: [[50, 50]],
     2: [[35, 35], [65, 65]],
