@@ -66,33 +66,24 @@ function saveLocal(key, value) {
 
 // ---------- Niveles de poder (según % del mes) ----------
 function nivelPara(pct) {
-  if (pct === 0) return { key: "bebe", label: "Recién nacido", aura: "#BFE3F2" };
-  if (pct < 40) return { key: "base", label: "Entrenando", aura: "#E2D9C9" };
-  if (pct < 70) return { key: "ssj", label: "Super nivel 1", aura: "#FFD23F" };
-  if (pct < 100) return { key: "ssjblue", label: "Super nivel 2", aura: "#4FC3F7" };
-  return { key: "ultra", label: "Instinto superior", aura: "#E8E8F0" };
+  if (pct === 0) return { key: "bebe", label: "Recién nacido", aura: "#BFE3F2", img: "warriors/warrior-1.png" };
+  if (pct < 40) return { key: "base", label: "Entrenando", aura: "#E2D9C9", img: "warriors/warrior-2.png" };
+  if (pct < 70) return { key: "ssj", label: "Super nivel 1", aura: "#FFD23F", img: "warriors/warrior-3.png" };
+  if (pct < 100) return { key: "ssjblue", label: "Super nivel 2", aura: "#4FC3F7", img: "warriors/warrior-4.png" };
+  return { key: "ultra", label: "Instinto superior", aura: "#E8E8F0", img: "warriors/warrior-4.png" };
 }
 
-// Trazos de silueta genéricos: proporciones de cría (cabeza grande + colita) vs.
-// guerrero adulto de pie en pose firme. Formas propias, no el contorno de un personaje existente.
-const BABY_SILHOUETTE =
-  "M50 18 C62 18 70 27 70 40 C70 47 67 52 62 56 C68 60 72 67 72 76 L72 95 C72 102 66 108 58 108 L42 108 C34 108 28 102 28 95 L28 76 C28 67 32 60 38 56 C33 52 30 47 30 40 C30 27 38 18 50 18 Z M68 92 C74 92 80 97 80 104 C80 109 76 112 72 110 C70 109 69 106 70 103 C68 104 66 102 67 99 C67 96 68 93 68 92 Z";
-
-const ADULT_SILHOUETTE =
-  "M50 8 C59 8 66 15 66 25 C66 31 63 36 59 39 L60 44 C68 46 74 53 76 62 L80 78 C81 83 78 87 73 87 C70 87 68 85 67 82 L63 68 L64 100 C64 105 67 108 70 110 L70 116 L56 116 L55 90 L50 90 L45 90 L44 116 L30 116 L30 110 C33 108 36 105 36 100 L37 68 L33 82 C32 85 30 87 27 87 C22 87 19 83 20 78 L24 62 C26 53 32 46 40 44 L41 39 C37 36 34 31 34 25 C34 15 41 8 50 8 Z";
-
-// ---------- Figura del guerrero: silueta tipo sombra (anime), no calca ningún personaje ----------
+// ---------- Figura del guerrero: imágenes provistas por el usuario, con aura/rayos generados por código ----------
 function Warrior({ pct, size = 96 }) {
   const lvl = nivelPara(pct);
-  const isBebe = lvl.key === "bebe";
   const isUltra = lvl.key === "ultra";
   const isSsjBlue = lvl.key === "ssjblue";
   const isSsj = lvl.key === "ssj";
   const energized = isSsj || isSsjBlue || isUltra;
-  const siluetaColor = "#0B0E16";
+  const height = size * 1.4;
 
   return (
-    <div style={{ position: "relative", width: size, height: size * 1.15 }}>
+    <div style={{ position: "relative", width: size, height, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       {pct > 0 && (
         <div
           className={isUltra ? "aura-ultra" : energized ? "aura-pulse" : ""}
@@ -130,23 +121,20 @@ function Warrior({ pct, size = 96 }) {
           })}
         </svg>
       )}
-      <svg viewBox="0 0 100 116" width={size} height={size * 1.16} style={{ position: "absolute", inset: 0, zIndex: 1 }}>
-        {isBebe ? (
-          <path d={BABY_SILHOUETTE} fill="none" stroke={lvl.aura} strokeWidth="2.6" opacity="0.9" transform="scale(1.035) translate(-1.7 -2)" />
-        ) : (
-          <path
-            d={ADULT_SILHOUETTE}
-            fill="none"
-            stroke={lvl.aura}
-            strokeWidth={isUltra ? 2.8 : 2.4}
-            opacity={pct > 0 ? 0.95 : 0}
-            transform="scale(1.03) translate(-1.5 -1.7)"
-          />
-        )}
-      </svg>
-      <svg viewBox="0 0 100 116" width={size} height={size * 1.16} style={{ position: "relative", zIndex: 2 }}>
-        <path d={isBebe ? BABY_SILHOUETTE : ADULT_SILHOUETTE} fill={siluetaColor} />
-      </svg>
+      <img
+        src={lvl.img}
+        alt={lvl.label}
+        style={{
+          position: "relative",
+          zIndex: 2,
+          maxWidth: "100%",
+          maxHeight: "100%",
+          height: "100%",
+          width: "auto",
+          objectFit: "contain",
+          filter: pct > 0 ? `drop-shadow(0 0 ${size * 0.08}px ${lvl.aura}99)` : "none",
+        }}
+      />
     </div>
   );
 }
@@ -754,13 +742,15 @@ const styles = {
   warriorStage: {
     flexShrink: 0,
     width: 84,
-    height: 94,
+    height: 130,
     borderRadius: 14,
     background: "radial-gradient(circle at 50% 38%, #1B2C4A 0%, #0A1322 80%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     boxShadow: "inset 0 0 0 1px #233A5C",
+    overflow: "hidden",
+    padding: 6,
   },
   powerInfo: { flex: 1, minWidth: 0 },
   powerHabitRow: { display: "flex", gap: 6, overflowX: "auto", marginBottom: 8, paddingBottom: 2 },
