@@ -66,11 +66,11 @@ function saveLocal(key, value) {
 
 // ---------- Niveles de poder (según % del mes) ----------
 function nivelPara(pct) {
-  if (pct === 0) return { key: "bebe", label: "Recién nacido", aura: "#BFE3F2", img: "warriors/warrior-1.png" };
-  if (pct < 40) return { key: "base", label: "Entrenando", aura: "#E2D9C9", img: "warriors/warrior-2.png" };
-  if (pct < 70) return { key: "ssj", label: "Super nivel 1", aura: "#FFD23F", img: "warriors/warrior-3.png" };
-  if (pct < 100) return { key: "ssjblue", label: "Super nivel 2", aura: "#4FC3F7", img: "warriors/warrior-4.png" };
-  return { key: "ultra", label: "Instinto superior", aura: "#E8E8F0", img: "warriors/warrior-4.png" };
+  if (pct === 0) return { key: "bebe", label: "Recién nacido", aura: "#BFE3F2", img: "warrior-1.png" };
+  if (pct < 40) return { key: "base", label: "Entrenando", aura: "#E2D9C9", img: "warrior-2.png" };
+  if (pct < 70) return { key: "ssj", label: "Super nivel 1", aura: "#FFD23F", img: "warrior-3.png" };
+  if (pct < 100) return { key: "ssjblue", label: "Super nivel 2", aura: "#4FC3F7", img: "warrior-4.png" };
+  return { key: "ultra", label: "Instinto superior", aura: "#E8E8F0", img: "warrior-4.png" };
 }
 
 // ---------- Figura del guerrero: imágenes provistas por el usuario, con aura/rayos generados por código ----------

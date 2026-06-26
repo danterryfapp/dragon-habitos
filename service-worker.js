@@ -1,4 +1,4 @@
-const CACHE_NAME = "dragon-habitos-v1";
+const CACHE_NAME = "dragon-habitos-v2";
 const ASSETS = [
   "./index.html",
   "./app.js",
@@ -6,6 +6,10 @@ const ASSETS = [
   "./icon-192.png",
   "./icon-512.png",
   "./icon-180.png",
+  "./warrior-1.png",
+  "./warrior-2.png",
+  "./warrior-3.png",
+  "./warrior-4.png",
 ];
 
 self.addEventListener("install", (event) => {
